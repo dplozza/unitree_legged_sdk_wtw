@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(unitree_legged_sdk)
 
 include_directories(include)
+include_directories(include/lcm_types)
 
 add_compile_options(-std=c++14)
 
@@ -15,7 +16,7 @@ if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64.*")
 endif()
 
 link_directories(lib/cpp/${ARCH})
-set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
+set(EXTRA_LIBS -pthread libunitree_legged_sdk.so lcm)
 
 set(CMAKE_CXX_FLAGS "-O3 -fPIC")
 
@@ -35,6 +36,8 @@ target_link_libraries(example_walk ${EXTRA_LIBS})
 add_executable(example_joystick example/example_joystick.cpp)
 target_link_libraries(example_joystick ${EXTRA_LIBS})
 
+add_executable(lcm_position example/lcm_position.cpp)
+target_link_libraries(lcm_position ${EXTRA_LIBS})
 
 # install
 install(TARGETS
