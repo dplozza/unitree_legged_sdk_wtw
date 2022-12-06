@@ -132,8 +132,6 @@ void Custom::RobotControl()
 {
     motiontime++;
     udp.GetRecv(state);
-    // printf("%d  %f\n", motiontime, state.motorState[FR_2].q);
-    // printf("%d  %f\n", motiontime, state.imu.quaternion[2]);
 
     memcpy(&_keyData, &state.wirelessRemote[0], 40);
 
@@ -185,78 +183,17 @@ void Custom::RobotControl()
     for(int i = 0; i < 4; i++){
         body_state_simple.contact_estimate[i] = state.footForce[i];
     }
-//    for(int i = 0; i < 12; i++){
-//        std::cout << " " <<  joint_state_simple.q[i];
-//    }
-//    std::cout << "\n";
-//    std::cout << "roll " <<  body_state_simple.rpy[0] << "\n";
-//    printf("%f\n", state.imu.quaternion[2]);
 
     _simpleLCM.publish("state_estimator_data", &body_state_simple);
     _simpleLCM.publish("leg_control_data", &joint_state_simple);
     _simpleLCM.publish("rc_command", &rc_command);
 
-    //end lcm publish
-
-    // verify received message
-//    std::cout << "first command received: " << _firstCommandReceived << "\n";
-//    if(_firstCommandReceived){
-//        printf("joint position commanded:  %f\n", joint_command_simple.q_des[0]);
-//    }
     if(_firstRun && joint_state_simple.q[0] != 0){
         for(int i = 0; i < 12; i++){
             joint_command_simple.q_des[i] = joint_state_simple.q[i];
         }
         _firstRun = false;
     }
-
-//    std::cout << "command ";
-//    for(int i = 0; i < 12; i++){
-//        std::cout << " " <<  joint_command_simple.q_des[i];
-//    }
-//    std::cout << "\n";
-
-
-
-
-    // gravity compensation
-    //cmd.motorCmd[FR_0].tau = -0.65f;
-    //cmd.motorCmd[FL_0].tau = +0.65f;
-    //cmd.motorCmd[RR_0].tau = -0.65f;
-    //cmd.motorCmd[RL_0].tau = +0.65f;
-
-    // if( motiontime >= 100){
-//    if( motiontime >= 0){
-//        // first, get record initial position
-//        // if( motiontime >= 100 && motiontime < 500){
-//        if( motiontime >= 0 && motiontime < 10){
-//            qInit[0] = state.motorState[FR_0].q;
-//            qInit[1] = state.motorState[FR_1].q;
-//            qInit[2] = state.motorState[FR_2].q;
-//        }
-//        // second, move to the origin point of a sine movement with Kp Kd
-//        // if( motiontime >= 500 && motiontime < 1500){
-//        if( motiontime >= 10 && motiontime < 400){
-//            rate_count++;
-//            double rate = rate_count/200.0;                       // needs count to 200
-//            Kp[0] = 5.0; Kp[1] = 5.0; Kp[2] = 5.0;
-//            Kd[0] = 1.0; Kd[1] = 1.0; Kd[2] = 1.0;
-//
-//            qDes[0] = jointLinearInterpolation(qInit[0], sin_mid_q[0], rate);
-//            qDes[1] = jointLinearInterpolation(qInit[1], sin_mid_q[1], rate);
-//            qDes[2] = jointLinearInterpolation(qInit[2], sin_mid_q[2], rate);
-//        }
-//        double sin_joint1, sin_joint2;
-//        // last, do sine wave
-//        if( motiontime >= 400){
-//            sin_count++;
-//            sin_joint1 = 0.6 * sin(3*M_PI*sin_count/1000.0);
-//            sin_joint2 = -0.6 * sin(1.8*M_PI*sin_count/1000.0);
-//            qDes[0] = sin_mid_q[0];
-//            qDes[1] = sin_mid_q[1];
-//            qDes[2] = sin_mid_q[2] + sin_joint2;
-//            // qDes[2] = sin_mid_q[2];
-//        }
 
     for(int i = 0; i < 12; i++){
         cmd.motorCmd[i].q = joint_command_simple.q_des[i];
@@ -266,47 +203,9 @@ void Custom::RobotControl()
         cmd.motorCmd[i].tau = joint_command_simple.tau_ff[i];
     }
 
-//        cmd.motorCmd[FR_1].q = qDes[1];
-//        cmd.motorCmd[FR_1].dq = 0;
-//        cmd.motorCmd[FR_1].Kp = Kp[1];
-//        cmd.motorCmd[FR_1].Kd = Kd[1];
-//        cmd.motorCmd[FR_1].tau = 0.0f;
-//
-//        cmd.motorCmd[FR_2].q =  qDes[2];
-//        cmd.motorCmd[FR_2].dq = 0;
-//        cmd.motorCmd[FR_2].Kp = Kp[2];
-//        cmd.motorCmd[FR_2].Kd = Kd[2];
-//        cmd.motorCmd[FR_2].tau = 0.0f;
-
-//    }
-
-//    if(motiontime > 10){
-
     safe.PositionLimit(cmd);
-    int res1 = safe.PowerProtect(cmd, state, 15);
-    // std::cout << "power protection 8 \n";
-    // You can uncomment it for position protection
-    // int res2 = safe.PositionProtect(cmd, state, 0.087);
-    // printf("%u\n", _keyData.btn.components.L2);
-    // if(res1 < 0) exit(-1);
-
-//    if(_keyData.btn.components.L2 > 0){
-//        sleep(0.1);
-//        //std::cout << "ESTOP\n";
-//    } else if(res1 < 0){
-//        std::cout << "ESTOP\n";
-//        while(_keyData.btn.components.R2 == 0){
-//            // wait for estop button press
-//            sleep(0.1);
-//            //
-//            udp.GetRecv(state);
-//            memcpy(&_keyData, state.wirelessRemote, 40);
-//        }
-//        std::cout << "END ESTOP\n";
-//    }
-//    else{
+    int res1 = safe.PowerProtect(cmd, state, 9);
     udp.SetSend(cmd);
-//    }
 
 }
 
