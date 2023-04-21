@@ -4,6 +4,7 @@
 
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
 #include "unitree_legged_sdk/joystick.h"
+#include "unitree_legged_sdk/go1_const.h"
 #include <math.h>
 #include <iostream>
 #include <stdio.h>
@@ -17,6 +18,14 @@
 
 using namespace std;
 using namespace UNITREE_LEGGED_SDK;
+
+
+constexpr double go1_Hip_max_mod   = 0.8; //1.047;    // unit:radian ( = 60   degree)
+constexpr double go1_Hip_min_mod   = -0.8; //-1.047;   // unit:radian ( = -60  degree)
+constexpr double go1_Thigh_max_mod = 2.966;    // unit:radian ( = 170  degree)
+constexpr double go1_Thigh_min_mod = -0.6; //-0.663;   // unit:radian ( = -38  degree)
+constexpr double go1_Calf_max_mod  = -0.9; //-0.837;   // unit:radian ( = -48  degree)
+constexpr double go1_Calf_min_mod  = -2.55;   // unit:radian ( = -156 degree)
 
 class Custom
 {
@@ -35,14 +44,14 @@ public:
     UDP udp;
     LowCmd cmd = {0};
     LowState state = {0};
-    float qInit[3]={0};
-    float qDes[3]={0};
-    float sin_mid_q[3] = {0.0, 1.2, -2.0};
-    float Kp[3] = {0};
-    float Kd[3] = {0};
-    double time_consume = 0;
-    int rate_count = 0;
-    int sin_count = 0;
+    // float qInit[3]={0};
+    // float qDes[3]={0};
+    // float sin_mid_q[3] = {0.0, 1.2, -2.0};
+    // float Kp[3] = {0};
+    // float Kd[3] = {0};
+    // double time_consume = 0;
+    // int rate_count = 0;
+    // int sin_count = 0;
     int motiontime = 0;
     float dt = 0.002;     // 0.001~0.01
 
@@ -73,7 +82,8 @@ void Custom::init()
     for(int i = 0; i < 12; i++){
         joint_command_simple.qd_des[i] = 0;
         joint_command_simple.tau_ff[i] = 0;
-        joint_command_simple.kp[i] = 20.;
+        // joint_command_simple.kp[i] = 20.;
+        joint_command_simple.kp[i] = 10; // set it lower to avoid over-current shutdown at startup??
         joint_command_simple.kd[i] = 0.5;
     }
 
@@ -195,6 +205,12 @@ void Custom::RobotControl()
         _firstRun = false;
     }
 
+    // filte the target angles so that they are not too different from the current angles
+    // double rate = 
+    // for(int i = 0; i < 12; i++){
+    //         joint_command_simple.q_des[i] = jointLinearInterpolation(joint_state_simple.q[i],rate)
+    // }
+
     for(int i = 0; i < 12; i++){
         cmd.motorCmd[i].q = joint_command_simple.q_des[i];
         cmd.motorCmd[i].dq = joint_command_simple.qd_des[i];
@@ -203,8 +219,41 @@ void Custom::RobotControl()
         cmd.motorCmd[i].tau = joint_command_simple.tau_ff[i];
     }
 
+    // Hip Limits
+    // cmd.motorCmd[FR_0].q = std::min(std::max(cmd.motorCmd[FR_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
+    // cmd.motorCmd[FL_0].q = std::min(std::max(cmd.motorCmd[FL_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
+    // cmd.motorCmd[RR_0].q = std::min(std::max(cmd.motorCmd[RR_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
+    // cmd.motorCmd[RL_0].q = std::min(std::max(cmd.motorCmd[RL_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
+
+    // // Thigh Limits
+    // cmd.motorCmd[FR_1].q = std::min(std::max(cmd.motorCmd[FR_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
+    // cmd.motorCmd[FL_1].q = std::min(std::max(cmd.motorCmd[FL_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
+    // cmd.motorCmd[RR_1].q = std::min(std::max(cmd.motorCmd[RR_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
+    // cmd.motorCmd[RL_1].q = std::min(std::max(cmd.motorCmd[RL_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
+
+    // // Calf Limits
+    // cmd.motorCmd[FR_2].q = std::min(std::max(cmd.motorCmd[FR_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
+    // cmd.motorCmd[FL_2].q = std::min(std::max(cmd.motorCmd[FL_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
+    // cmd.motorCmd[RR_2].q = std::min(std::max(cmd.motorCmd[RR_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
+    // cmd.motorCmd[RL_2].q = std::min(std::max(cmd.motorCmd[RL_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
+
+
+
+    printf("State Angles: %f  %f  %f     ", state.motorState[FR_0].q, state.motorState[FR_1].q, state.motorState[FR_2].q);
+    printf("Cmd Angles: %f  %f  %f     ", cmd.motorCmd[FR_0].q, cmd.motorCmd[FR_1].q, cmd.motorCmd[FR_2].q);
+    //printf("Cmd Vels: %f  %f  %f     ", cmd.motorCmd[FR_0].dq, cmd.motorCmd[FR_1].dq, cmd.motorCmd[FR_2].dq);
+    //printf("Cmd Tau: %f  %f  %f\n", cmd.motorCmd[FR_0].tau, cmd.motorCmd[FR_1].tau, cmd.motorCmd[FR_2].tau);
+    printf("Cmd Kp: %f  %f  %f     ", cmd.motorCmd[FR_0].Kp, cmd.motorCmd[FR_1].Kp, cmd.motorCmd[FR_2].Kp);
+    printf("Cmd Kd: %f  %f  %f\n", cmd.motorCmd[FR_0].Kd, cmd.motorCmd[FR_1].Kd, cmd.motorCmd[FR_2].Kd);
+    //state.motorState[FR_1].dq, state.motorState[FR_1].q, state.motorState[FR_1].dq);
+
+
     safe.PositionLimit(cmd);
     int res1 = safe.PowerProtect(cmd, state, 9);
+    //int res2 = safe.PositionProtect(cmd, state, 1); //0.087 = 5 degree
+    printf("%d\n",res1);
+    if(res1 < 0) exit(-1);
+
     udp.SetSend(cmd);
 
 }
@@ -219,6 +268,7 @@ int main(void)
 
     Custom custom(LOWLEVEL);
     custom.init();
+    
     // InitEnvironment();
     LoopFunc loop_control("control_loop", custom.dt,    boost::bind(&Custom::RobotControl, &custom));
     LoopFunc loop_udpSend("udp_send",     custom.dt, 3, boost::bind(&Custom::UDPSend,      &custom));

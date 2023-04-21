@@ -16,33 +16,38 @@ if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64.*")
 endif()
 
 link_directories(lib/cpp/${ARCH})
+# If set libunitree_legged_sdk.a joistick does not work,
+# so I assume it uses the libunitree_legged_sdk.so from somewhere else
 set(EXTRA_LIBS -pthread libunitree_legged_sdk.so lcm)
 
 set(CMAKE_CXX_FLAGS "-O3 -fPIC")
 
 # one pc one process
-add_executable(example_position example/example_position.cpp)
-target_link_libraries(example_position ${EXTRA_LIBS})
+# add_executable(example_position example/example_position.cpp)#
+# target_link_libraries(example_position ${EXTRA_LIBS})
 
-add_executable(example_velocity example/example_velocity.cpp)
-target_link_libraries(example_velocity ${EXTRA_LIBS})
+# add_executable(example_velocity example/example_velocity.cpp)
+# target_link_libraries(example_velocity ${EXTRA_LIBS})
 
-add_executable(example_torque example/example_torque.cpp)
-target_link_libraries(example_torque ${EXTRA_LIBS})
+# add_executable(example_torque example/example_torque.cpp)
+# target_link_libraries(example_torque ${EXTRA_LIBS})
 
-add_executable(example_walk example/example_walk.cpp)
-target_link_libraries(example_walk ${EXTRA_LIBS})
+# add_executable(example_walk example/example_walk.cpp)
+# target_link_libraries(example_walk ${EXTRA_LIBS})
 
-add_executable(example_joystick example/example_joystick.cpp)
-target_link_libraries(example_joystick ${EXTRA_LIBS})
+# add_executable(example_joystick example/example_joystick.cpp)
+# target_link_libraries(example_joystick ${EXTRA_LIBS})
 
 add_executable(lcm_position example/lcm_position.cpp)
 target_link_libraries(lcm_position ${EXTRA_LIBS})
 
 # install
-install(TARGETS
-  example_position example_velocity example_torque example_walk example_joystick
-  DESTINATION bin/unitree)
+# install(TARGETS
+#   example_position example_velocity example_torque example_walk example_joystick
+#   DESTINATION bin/unitree)
+# install(TARGETS
+#   example_position 
+#   DESTINATION bin/unitree)
 install(DIRECTORY lib/cpp/${ARCH}/
   DESTINATION lib/unitree
   USE_SOURCE_PERMISSIONS)
