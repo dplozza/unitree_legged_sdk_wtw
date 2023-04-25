@@ -251,7 +251,7 @@ void Custom::RobotControl()
 
     safe.PositionLimit(cmd);
     //int res1 = safe.PowerProtect(cmd, state, 9);
-    safe.PowerProtect(cmd, state, 9);
+    safe.PowerProtect(cmd, state, 5);
     //int res2 = safe.PositionProtect(cmd, state, 1); //0.087 = 5 degree
 
     udp.SetSend(cmd);
