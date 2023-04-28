@@ -4,7 +4,7 @@
 
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
 #include "unitree_legged_sdk/unitree_joystick.h"
-//#include "unitree_legged_sdk/go1_const.h"
+//#include "unitree_legged_sdk/a1_Const.h"
 #include <math.h>
 #include <iostream>
 #include <stdio.h>
@@ -20,12 +20,19 @@ using namespace std;
 using namespace UNITREE_LEGGED_SDK;
 
 
-constexpr double go1_Hip_max_mod   = 0.8; //1.047;    // unit:radian ( = 60   degree)
-constexpr double go1_Hip_min_mod   = -0.8; //-1.047;   // unit:radian ( = -60  degree)
-constexpr double go1_Thigh_max_mod = 2.966;    // unit:radian ( = 170  degree)
-constexpr double go1_Thigh_min_mod = -0.6; //-0.663;   // unit:radian ( = -38  degree)
-constexpr double go1_Calf_max_mod  = -0.9; //-0.837;   // unit:radian ( = -48  degree)
-constexpr double go1_Calf_min_mod  = -2.55;   // unit:radian ( = -156 degree)
+// constexpr double go1_Hip_max_mod   = 0.8; //1.047;    // unit:radian ( = 60   degree)
+// constexpr double go1_Hip_min_mod   = -0.8; //-1.047;   // unit:radian ( = -60  degree)
+// constexpr double go1_Thigh_max_mod = 2.966;    // unit:radian ( = 170  degree)
+// constexpr double go1_Thigh_min_mod = -0.6; //-0.663;  _
+
+
+// arbitrary angle limits to avoid dangerous movements
+double const a1_Hip_max_mod   = 0.65;    // 0.802 unit:radian ( = 46   degree)
+double const a1_Hip_min_mod   = -0.65;   // -0.802 unit:radian ( = -46  degree)
+double const a1_Thigh_max_mod =  2.4;     // 4.19 unit:radian ( = 240  degree)
+double const a1_Thigh_min_mod = -0.4;    // -1.05 unit:radian ( = -60  degree)
+double const a1_Calf_max_mod  = -1.05;   // -0.916 unit:radian ( = -52.5  degree)
+double const a1_Calf_min_mod  = -2.6;     // -2.7 unit:radian ( = -154.5 degree)
 
 class Custom
 {
@@ -221,33 +228,43 @@ void Custom::RobotControl()
     }
 
     // Hip Limits
-    // cmd.motorCmd[FR_0].q = std::min(std::max(cmd.motorCmd[FR_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
-    // cmd.motorCmd[FL_0].q = std::min(std::max(cmd.motorCmd[FL_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
-    // cmd.motorCmd[RR_0].q = std::min(std::max(cmd.motorCmd[RR_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
-    // cmd.motorCmd[RL_0].q = std::min(std::max(cmd.motorCmd[RL_0].q, (float)go1_Hip_min_mod), (float)go1_Hip_max_mod);
+    cmd.motorCmd[FR_0].q = std::min(std::max(cmd.motorCmd[FR_0].q, (float)a1_Hip_min_mod), (float)a1_Hip_max_mod);
+    cmd.motorCmd[FL_0].q = std::min(std::max(cmd.motorCmd[FL_0].q, (float)a1_Hip_min_mod), (float)a1_Hip_max_mod);
+    cmd.motorCmd[RR_0].q = std::min(std::max(cmd.motorCmd[RR_0].q, (float)a1_Hip_min_mod), (float)a1_Hip_max_mod);
+    cmd.motorCmd[RL_0].q = std::min(std::max(cmd.motorCmd[RL_0].q, (float)a1_Hip_min_mod), (float)a1_Hip_max_mod);
 
-    // // Thigh Limits
-    // cmd.motorCmd[FR_1].q = std::min(std::max(cmd.motorCmd[FR_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
-    // cmd.motorCmd[FL_1].q = std::min(std::max(cmd.motorCmd[FL_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
-    // cmd.motorCmd[RR_1].q = std::min(std::max(cmd.motorCmd[RR_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
-    // cmd.motorCmd[RL_1].q = std::min(std::max(cmd.motorCmd[RL_1].q, (float)go1_Thigh_min_mod), (float)go1_Thigh_max_mod);
+    // Thigh Limits
+    cmd.motorCmd[FR_1].q = std::min(std::max(cmd.motorCmd[FR_1].q, (float)a1_Thigh_min_mod), (float)a1_Thigh_max_mod);
+    cmd.motorCmd[FL_1].q = std::min(std::max(cmd.motorCmd[FL_1].q, (float)a1_Thigh_min_mod), (float)a1_Thigh_max_mod);
+    cmd.motorCmd[RR_1].q = std::min(std::max(cmd.motorCmd[RR_1].q, (float)a1_Thigh_min_mod), (float)a1_Thigh_max_mod);
+    cmd.motorCmd[RL_1].q = std::min(std::max(cmd.motorCmd[RL_1].q, (float)a1_Thigh_min_mod), (float)a1_Thigh_max_mod);
 
-    // // Calf Limits
-    // cmd.motorCmd[FR_2].q = std::min(std::max(cmd.motorCmd[FR_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
-    // cmd.motorCmd[FL_2].q = std::min(std::max(cmd.motorCmd[FL_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
-    // cmd.motorCmd[RR_2].q = std::min(std::max(cmd.motorCmd[RR_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
-    // cmd.motorCmd[RL_2].q = std::min(std::max(cmd.motorCmd[RL_2].q, (float)go1_Calf_min_mod), (float)go1_Calf_max_mod);
+    // Calf Limits
+    cmd.motorCmd[FR_2].q = std::min(std::max(cmd.motorCmd[FR_2].q, (float)a1_Calf_min_mod), (float)a1_Calf_max_mod);
+    cmd.motorCmd[FL_2].q = std::min(std::max(cmd.motorCmd[FL_2].q, (float)a1_Calf_min_mod), (float)a1_Calf_max_mod);
+    cmd.motorCmd[RR_2].q = std::min(std::max(cmd.motorCmd[RR_2].q, (float)a1_Calf_min_mod), (float)a1_Calf_max_mod);
+    cmd.motorCmd[RL_2].q = std::min(std::max(cmd.motorCmd[RL_2].q, (float)a1_Calf_min_mod), (float)a1_Calf_max_mod);
 
+    // front Thigh Calf combined limits (avoid self collision)
+    if (cmd.motorCmd[FR_1].q > 2.15 && cmd.motorCmd[FR_2].q > -1.8 )
+        cmd.motorCmd[FR_2].q = -1.9;//cmd.motorCmd[FR_1].q = 2.06;
+    if (cmd.motorCmd[FL_1].q > 2.15 && cmd.motorCmd[FL_2].q > -1.8 )
+        cmd.motorCmd[FL_2].q = -1.9;//cmd.motorCmd[FR_1].q = 2.06;
+    if (cmd.motorCmd[RR_1].q > 2.15 && cmd.motorCmd[RR_2].q > -1.8 )
+        cmd.motorCmd[RR_2].q = -1.9;//cmd.motorCmd[FR_1].q = 2.06;
+    if (cmd.motorCmd[RL_1].q > 2.15 && cmd.motorCmd[RL_2].q > -1.8 )
+        cmd.motorCmd[RL_2].q = -1.9;//cmd.motorCmd[FR_1].q = 2.06;
+    
 
-
-    printf("State Angles: %f  %f  %f     ", state.motorState[FR_0].q, state.motorState[FR_1].q, state.motorState[FR_2].q);
-    printf("Cmd Angles: %f  %f  %f     ", cmd.motorCmd[FR_0].q, cmd.motorCmd[FR_1].q, cmd.motorCmd[FR_2].q);
+    printf("State Angles RR: %f  %f  %f     ", state.motorState[RR_0].q, state.motorState[RR_1].q, state.motorState[RR_2].q);
+    printf("State Angles FR: %f  %f  %f     ", state.motorState[FR_0].q, state.motorState[FR_1].q, state.motorState[FR_2].q);
+    printf("Cmd Angles FR: %f  %f  %f     ", cmd.motorCmd[FR_0].q, cmd.motorCmd[FR_1].q, cmd.motorCmd[FR_2].q);
     //printf("Cmd Vels: %f  %f  %f     ", cmd.motorCmd[FR_0].dq, cmd.motorCmd[FR_1].dq, cmd.motorCmd[FR_2].dq);
     //printf("Cmd Tau: %f  %f  %f\n", cmd.motorCmd[FR_0].tau, cmd.motorCmd[FR_1].tau, cmd.motorCmd[FR_2].tau);
-    printf("Cmd Kp: %f  %f  %f     ", cmd.motorCmd[FR_0].Kp, cmd.motorCmd[FR_1].Kp, cmd.motorCmd[FR_2].Kp);
-    printf("Cmd Kd: %f  %f  %f\n", cmd.motorCmd[FR_0].Kd, cmd.motorCmd[FR_1].Kd, cmd.motorCmd[FR_2].Kd);
+    //printf("Cmd Kp: %f  %f  %f     ", cmd.motorCmd[FR_0].Kp, cmd.motorCmd[FR_1].Kp, cmd.motorCmd[FR_2].Kp);
+    //printf("Cmd Kd: %f  %f  %f", cmd.motorCmd[FR_0].Kd, cmd.motorCmd[FR_1].Kd, cmd.motorCmd[FR_2].Kd);
     //state.motorState[FR_1].dq, state.motorState[FR_1].q, state.motorState[FR_1].dq);
-
+    printf("\n");
 
     safe.PositionLimit(cmd);
     //int res1 = safe.PowerProtect(cmd, state, 9);
