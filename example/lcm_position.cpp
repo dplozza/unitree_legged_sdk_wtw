@@ -25,7 +25,7 @@ constexpr double go1_Hip_min_mod   = -0.8; //-1.047;   // unit:radian ( = -60  d
 constexpr double go1_Thigh_max_mod = 2.966;    // unit:radian ( = 170  degree)
 constexpr double go1_Thigh_min_mod = -0.6; //-0.663;   // unit:radian ( = -38  degree)
 constexpr double go1_Calf_max_mod  = -0.9; //-0.837;   // unit:radian ( = -48  degree)
-constexpr double go1_Calf_min_mod  = -2.55;   // unit:radian ( = -156 degree)
+constexpr double go1_Calf_min_mod  = -2.55;   //2.721 unit:radian ( = -156 degree)
 
 class Custom
 {
@@ -202,6 +202,24 @@ void Custom::RobotControl()
         for(int i = 0; i < 12; i++){
             joint_command_simple.q_des[i] = joint_state_simple.q[i];
         }
+
+        // the next two lines are enough to fuck the robot (but not singularly)
+        //joint_command_simple.q_des[FR_0] = -0.5;
+        //joint_command_simple.q_des[FL_0] = 0.5;        
+        //joint_command_simple.q_des[RR_0] = -0.5;
+        //joint_command_simple.q_des[RL_0] = 0.5;
+
+        // joint_command_simple.q_des[FR_1] =  2.0;
+        // joint_command_simple.q_des[FL_1] =  2.0;
+        // joint_command_simple.q_des[RR_1] =  2.0;
+        // joint_command_simple.q_des[RL_1] =  2.0;
+
+        // joint_command_simple.q_des[FR_2] = -2.4;
+        // joint_command_simple.q_des[FL_2] = -2.4;
+        // joint_command_simple.q_des[RR_2] = -2.4;
+        // joint_command_simple.q_des[RL_2] = -2.4;
+
+        
         _firstRun = false;
     }
 
